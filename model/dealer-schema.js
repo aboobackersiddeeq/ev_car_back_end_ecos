@@ -3,12 +3,13 @@ const mongoose = require("mongoose");
 const dealerSchema = new mongoose.Schema(
   {
     dealerName: { type: String, required: true, trim: true },
-    
+
     state: {
       type: String,
       trim: true,
       required: true,
-    },password: {
+    },
+    password: {
       type: String,
       trim: true,
       required: true,
@@ -24,7 +25,8 @@ const dealerSchema = new mongoose.Schema(
       trim: true,
       required: true,
       // unique: true,
-    },phone: {
+    },
+    phone: {
       required: true,
       minlength: [10],
       type: Number,

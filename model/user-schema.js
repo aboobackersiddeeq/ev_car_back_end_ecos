@@ -24,13 +24,15 @@ const userSchema = new mongoose.Schema(
     image: {
       type: String,
     },
-    testDriveBooking: [{
-      type: Object,
-    }],
+    testDriveBooking: [
+      {
+        type: Object,
+      },
+    ],
     Booking: {
       type: String,
     },
-    
+
     isBanned: { type: Boolean, default: false },
   },
   {

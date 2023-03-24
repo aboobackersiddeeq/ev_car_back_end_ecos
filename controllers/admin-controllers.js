@@ -1,20 +1,19 @@
-const Admin = require("../model/adminSchema");
+const Admin = require("../model/admin-schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../model/user-schema");
-const Product = require("../model/productschema");
-const testDrive = require("../model/testDriveSchema");
+const Product = require("../model/product-schema");
+const testDrive = require("../model/test-drive-schema");
 const Dealer = require("../model/dealer-schema");
+const bookingSchema = require("../model/booking-schema");
 module.exports = {
   adminLogin: async (req, res) => {
     try {
-      console.log(req.body);
       const { email, password } = req.body;
       const admin = await Admin.findOne({ email: email });
       if (admin) {
         isMatch = await bcrypt.compare(password, admin.password);
         if (isMatch) {
-          console.log();
           const token = jwt.sign(
             { adminId: admin._id },
             process.env.ACCESS_TOKEN_SECRET,
@@ -45,7 +44,7 @@ module.exports = {
         });
       }
     } catch (error) {
-      console.log(error);
+      res.json({ status: "failed", message: error.message });
     }
   },
   adminAuth: async (req, res) => {
@@ -99,15 +98,11 @@ module.exports = {
   },
   addPostProducts: async (req, res) => {
     try {
-      console.log(req.body);
-      console.log(req.files.img);
       const image = req.files.img;
       let product = "";
       if (product) {
         res.json("This Product is already entered");
-        console.log("This Product is already entered");
       } else if (!image) {
-        console.log("image not found");
         res.json({ status: "filed", err: "image not found" });
         error = "";
       } else {
@@ -124,7 +119,7 @@ module.exports = {
         res.json({ status: "success" });
       }
     } catch (err) {
-      console.log(err);
+      res.json({ status: "failed", message: error.message });
     }
   },
   deleteProduct: async (req, res) => {
@@ -142,7 +137,6 @@ module.exports = {
   editProduct: async (req, res) => {
     try {
       const id = req.body.editId;
-      console.log(req.body);
       await Product.findByIdAndUpdate(id, {
         productName: req.body.productName,
         price: req.body.price,
@@ -196,6 +190,15 @@ module.exports = {
       res.json({ status: "failed", message: error.message });
     }
   },
+  getBooking: async (req, res) => {
+    try {
+      const Details = await bookingSchema.find({});
+      Details.reverse();
+      res.json({ status: "success", result: Details });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
   // dealres details
   deleteDealer: async (req, res) => {
     try {
@@ -211,7 +214,7 @@ module.exports = {
   },
   editDealer: async (req, res) => {
     try {
-      const { dealerName,phone, city, state, email } = req.body;
+      const { dealerName, phone, city, state, email } = req.body;
       const id = req.body.editId;
       await Dealer.findByIdAndUpdate(id, {
         dealerName,
@@ -230,7 +233,7 @@ module.exports = {
   },
   addDealer: async (req, res) => {
     try {
-      const { dealerName,phone, password, city, state, email } = req.body;
+      const { dealerName, phone, password, city, state, email } = req.body;
       const exist = await Dealer.findOne({ dealerName: dealerName });
       if (exist) {
         res.json({
@@ -248,20 +251,17 @@ module.exports = {
           state,
           email,
         }).then(async (result) => {
-          console.log(result);
           const Details = await Dealer.find({});
           Details.reverse();
           res.json({ status: "success", result: Details });
         });
       }
     } catch (error) {
-      console.log(error);
       res.json({ status: "failed", message: error.message });
     }
   },
   getDealer: async (req, res) => {
     try {
-      console.log('hi');
       const Details = await Dealer.find({});
       Details.reverse();
       res.json({ status: "success", result: Details });
@@ -269,23 +269,20 @@ module.exports = {
       res.json({ status: "failed", message: error.message });
     }
   },
-  block_dealer:async (req,res)=>{
+  block_dealer: async (req, res) => {
     try {
-      console.log(req.body);
-      const id =req.body.id
-      const dealer =await Dealer.findOne({_id:id})
-      if(dealer.isBanned === false){
-          console.log('false');  
-        await Dealer.findByIdAndUpdate(id,{isBanned:true})
-      }else{
-        console.log(true);
-        await Dealer.findByIdAndUpdate(id,{isBanned:false})
+      const id = req.body.id;
+      const dealer = await Dealer.findOne({ _id: id });
+      if (dealer.isBanned === false) {
+        await Dealer.findByIdAndUpdate(id, { isBanned: true });
+      } else {
+        await Dealer.findByIdAndUpdate(id, { isBanned: false });
       }
-        const Details = await Dealer.find({});
-        Details.reverse()
-        res.json({"status":"success",result:Details})
+      const Details = await Dealer.find({});
+      Details.reverse();
+      res.json({ status: "success", result: Details });
     } catch (error) {
-        res.json({"status":"failed",message:error.message})
+      res.json({ status: "failed", message: error.message });
     }
-  }
+  },
 };
