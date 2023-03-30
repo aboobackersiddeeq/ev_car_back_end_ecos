@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       trim: true,
-      required: true,
       minlength: [6],
     },
     phone: {
@@ -30,6 +29,9 @@ const userSchema = new mongoose.Schema(
       },
     ],
     Booking: {
+      type: String,
+    },
+    Provider: {
       type: String,
     },
 

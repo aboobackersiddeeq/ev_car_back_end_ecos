@@ -49,7 +49,7 @@ module.exports = {
     }
   },
   getPlaceNear: async (req, res) => {
-    const {long,lat}=req.body
+    const { long, lat } = req.body;
     try {
       const Details = await MapSchema.find({
         location: {
@@ -61,7 +61,7 @@ module.exports = {
             $maxDistance: 15000, // distance in meters
           },
         },
-      })
+      });
       res.json({
         result: Details,
         status: "success",

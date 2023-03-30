@@ -7,9 +7,9 @@ const mapSchema = new mongoose.Schema(
       required: true,
     },
     email: {
-        type: String,
-        required: true,
-      },
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -26,9 +26,9 @@ const mapSchema = new mongoose.Schema(
       required: true,
     },
     location: {
-        type: { type: String },
-        coordinates: []
-       },
+      type: { type: String },
+      coordinates: [],
+    },
     long: {
       type: Number,
       required: true,

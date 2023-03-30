@@ -13,6 +13,7 @@ const bcrypt = require("bcrypt");
 const userRouter = require("./routers/user-router");
 const adminRouter = require("./routers/admin-router");
 const dealerRouter = require("./routers/dealer-router");
+const mapRouter = require("./routers/map-router");
 
 const fileStorage = multer.diskStorage({
   // Destination to store image
@@ -66,6 +67,7 @@ app.use(cookieParser());
 app.use("/", userRouter);
 app.use("/admin", adminRouter);
 app.use("/dealer", dealerRouter);
+app.use("/map", mapRouter);
 
 app.listen(3001, () => {
   console.log("server started on port 3001");

@@ -33,7 +33,7 @@ const bookingSchema = new mongoose.Schema(
       trim: true,
     },
     bookingPrice: {
-      type: String,
+      type: Number,
       trim: true,
     },
     address1: {

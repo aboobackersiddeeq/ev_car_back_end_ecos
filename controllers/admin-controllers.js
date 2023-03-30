@@ -6,6 +6,7 @@ const Product = require("../model/product-schema");
 const testDrive = require("../model/test-drive-schema");
 const Dealer = require("../model/dealer-schema");
 const bookingSchema = require("../model/booking-schema");
+const _ = require("lodash");
 module.exports = {
   adminLogin: async (req, res) => {
     try {
@@ -63,10 +64,55 @@ module.exports = {
       res.json({ status: "failed", message: error.message });
     }
   },
+  // dashboard
+
+  dashboard: async (req, res) => {
+    try {
+      const totalBooking = (await bookingSchema.find()).length;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set time to midnight
+
+      const todayBookingCount = await bookingSchema.find({
+        createdAt: { $gte: today },
+      });
+      const todayTestDriveCount = await testDrive.find({
+        createdAt: { $gte: today },
+      });
+
+      const revenue = await bookingSchema.aggregate([
+        {
+          $match: {
+            status: { $eq: "Placed" },
+          },
+        },
+        {
+          $group: {
+            _id: {},
+
+            total: { $sum: "$bookingPrice" },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+      res.json({
+        auth: true,
+        revenue: revenue[0].total,
+        totalBooking: totalBooking,
+        todayBookingCount: todayBookingCount.length,
+        todayTestDriveCount: todayTestDriveCount.length,
+        status: "success",
+        message: "signin success",
+      });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+
+  // users details
   getUsers: async (req, res) => {
     try {
       const users = await User.find({});
-
+      users.reverse();
       res.json({ status: "success", result: users });
     } catch (error) {
       res.json({ status: "failed", message: error.message });
@@ -92,6 +138,22 @@ module.exports = {
       const users = await User.find({});
 
       res.json({ status: "success", result: users });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  block_user: async (req, res) => {
+    try {
+      const id = req.body.id;
+      const user = await User.findOne({ _id: id });
+      if (user.isBanned === false) {
+        await User.findByIdAndUpdate(id, { isBanned: true });
+      } else {
+        await User.findByIdAndUpdate(id, { isBanned: false });
+      }
+      const Details = await User.find({});
+      Details.reverse();
+      res.json({ status: "success", result: Details });
     } catch (error) {
       res.json({ status: "failed", message: error.message });
     }
@@ -281,6 +343,86 @@ module.exports = {
       const Details = await Dealer.find({});
       Details.reverse();
       res.json({ status: "success", result: Details });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  chart1: async (req, res) => {
+    try {
+      const booking = await bookingSchema.aggregate([
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+              day: { $dayOfMonth: "$createdAt" },
+            },
+            booking: { $sum: 1 },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ]);
+      const testDriveBooking = await testDrive.aggregate([
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+              day: { $dayOfMonth: "$createdAt" },
+            },
+            testDrive: { $sum: 1 },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ]);
+      const mergedObject = _.merge(booking, testDriveBooking);
+      const data = mergedObject.map((el) => {
+        const newOne = el;
+        // eslint-disable-next-line no-underscore-dangle
+        newOne._id = Object.values(newOne._id).join("-");
+        return newOne;
+      });
+
+      const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      const revenue = await bookingSchema.aggregate([
+        {
+          $match: {
+            status: { $eq: "Placed" },
+          },
+        },
+
+        {
+          $group: {
+            _id: {
+              month: { $month: "$createdAt" },
+            },
+            total: { $sum: "$bookingPrice" },
+            // count: { $sum: 1 },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ]);
+      const sales = revenue.map((el) => {
+        const newOne = el;
+        // eslint-disable-next-line no-underscore-dangle
+        newOne._id = months[newOne._id.month - 1];
+        return newOne;
+      });
+
+      res.json({ status: "success", result: data, revenue: sales });
     } catch (error) {
       res.json({ status: "failed", message: error.message });
     }

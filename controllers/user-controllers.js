@@ -1,12 +1,13 @@
 const User = require("../model/user-schema");
 const testDrive = require("../model/test-drive-schema");
 const bookingSchema = require("../model/booking-schema");
-const Dealer =require('../model/dealer-schema')
-
+const Dealer = require("../model/dealer-schema");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 module.exports = {
   usersignup: async (req, res) => {
     try {
-      const { username, email, password } = req.body;
+      const { username, email, password, phone } = req.body;
       const user = await User.findOne({ email: email });
       if (user) {
         res.json({
@@ -16,55 +17,146 @@ module.exports = {
       } else {
         const salt = await bcrypt.genSalt(10);
         const hashPassword = await bcrypt.hash(password.trim(), salt);
-        await usermodel.create({
+        await User.create({
           username,
           email,
           password: hashPassword,
+          phone,
+        }).then((data) => {
+          const userId = data._id;
+          const token = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: 3000,
+          }); //1h = 60 * 60
+          res.json({
+            auth: true,
+            token: token,
+            result: data,
+            status: "success",
+            message: "signin success",
+          });
         });
-        res.json({ status: "success", message: "signup success" });
       }
     } catch (error) {
       res.json({ status: "failed", message: error.message });
     }
   },
   userlogin: async (req, res) => {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email: email });
+    try {
+      const { email, password } = req.body;
+      const user = await User.findOne({ email: email });
 
-    if (user) {
-      const userId = user._id;
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (isMatch) {
-        const token = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
-          expiresIn: 300,
-        }); //1h = 60 * 60
+      if (user) {
+        if (user.isBanned === false) {
+          const userId = user._id;
+          const isMatch = await bcrypt.compare(password, user.password);
+          if (isMatch) {
+            const token = jwt.sign(
+              { userId },
+              process.env.ACCESS_TOKEN_SECRET,
+              {
+                expiresIn: 3000,
+              }
+            ); //1h = 60 * 60
+            res.json({
+              auth: true,
+              token: token,
+              result: user,
+              status: "success",
+              message: "signin success",
+            });
+          }
+        } else {
+          res.json({
+            auth: false,
+            status: "failed",
+            message: "Something went wrong ,Please contact us",
+          });
+        }
+      } else {
         res.json({
-          auth: true,
-          token: token,
-          result: user,
-          status: "success",
-          message: "signin success",
+          auth: false,
+          status: "failed",
+          message: "No user please register",
         });
       }
-    } else {
+    } catch (error) {
       res.json({
         auth: false,
         status: "failed",
-        message: "No user please register",
+        message: error.message,
+      });
+    }
+  },
+  userloginWithGoogle: async (req, res) => {
+    try {
+      const { email, username, provider } = req.body;
+      const user = await User.findOne({ email: email });
+
+      if (user) {
+        if (user.isBanned === false) {
+          const userId = user._id;
+          const token = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: 3000,
+          }); //1h = 60 * 60
+          res.json({
+            auth: true,
+            token: token,
+            result: user,
+            status: "success",
+            message: "signin success",
+          });
+        } else {
+          res.json({
+            auth: false,
+            status: "failed",
+            message: "Something went wrong ,Please contact us",
+          });
+        }
+      } else {
+        await User.create({
+          username,
+          email,
+          provider,
+        }).then((data) => {
+          const userId = data._id;
+          const token = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: 3000,
+          }); //1h = 60 * 60
+          res.json({
+            auth: true,
+            token: token,
+            result: data,
+            status: "success",
+            message: "signin success",
+          });
+        });
+      }
+    } catch (error) {
+      res.json({
+        auth: false,
+        status: "failed",
+        message: error.message,
       });
     }
   },
   isUserAuth: async (req, res) => {
     try {
       let userDetails = await User.findById(req.userId);
-      userDetails.auth = true;
-      res.json({
-        username: userDetails.username,
-        email: userDetails.email,
-        auth: true,
-        image: userDetails.image || null,
-      });
-    } catch (e) {}
+      if (userDetails) {
+        res.json({
+          username: userDetails.username,
+          email: userDetails.email,
+          auth: true,
+          image: userDetails.image || null,
+        });
+      } else {
+        res.json({
+          message: "user not found",
+        });
+      }
+    } catch (e) {
+      res.json({ message: e.message });
+    }
   },
   userEdit: async (req, res) => {
     try {
@@ -134,20 +226,23 @@ module.exports = {
       } = obj;
       const exist = await bookingSchema.findOne({ email: email });
       if (exist) {
-        const status = await bookingSchema.findOne({ email: email ,status:'Pending'});
-        if(status){
+        const status = await bookingSchema.findOne({
+          email: email,
+          status: "Pending",
+        });
+        if (status) {
           res.json({
             status: "Pending",
-            message: "You already  booked  ,Your transaction cannot be completed",
+            message:
+              "You already  booked  ,Your transaction cannot be completed",
             orderId: status._id,
           });
-        }else{
+        } else {
           res.json({
             status: "failed",
             message: "You already  booked ",
           });
         }
-        
       } else {
         await bookingSchema
           .create({
@@ -196,5 +291,5 @@ module.exports = {
     } catch (error) {
       res.json({ status: "failed", message: error.message });
     }
-  }
+  },
 };
