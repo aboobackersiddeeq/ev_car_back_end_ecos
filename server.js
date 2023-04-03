@@ -1,9 +1,69 @@
 // Initialize express
 require("dotenv").config();
 const express = require("express");
+const http =require('http')
+const Server =require("socket.io").Server
 const app = express();
-const logger = require("morgan");
+
+const server = http.createServer(app)
 const cors = require("cors");
+const io =new Server(server,{
+  cors:{
+    origin:"*"
+  }
+})
+let users = [];
+
+//Add this before the app.get() block
+socketIO.on('connection', (socket) => {
+    console.log(`⚡: ${socket.id} user just connected!`);
+
+    //sends the message to all the users on the server
+    socket.on('message', async (data) => {
+        // socketIO.emit('messageResponse', data);
+        //Adds the new user to the list of users
+        users.push(data.name);
+       
+        //Sends the list of users to the client
+        io.emit('newUserResponse', users);
+
+        const saveMsg = new Messages({
+            name: data.name,
+            text: data.text,
+            group: data.groupId
+        });
+        await saveMsg.save().then(async() => {
+            await Group.findByIdAndUpdate(data.groupId, { messageUpdate: new Date() })
+            console.log("🐱‍🏍:Message saved in db");
+        }).catch((err) => {
+            console.log(err);
+        })
+    });
+
+    socket.on('typing', (data) => socket.broadcast.emit('typingResponse', data));
+
+    socket.on('disconnect', () => {
+        console.log('😪: A user disconnected');
+        //Updates the list of users when a user disconnects from the server
+        users = users.filter((user) => user.socketID !== socket.id);
+        // console.log(users);
+        //Sends the list of users to the client
+        io.emit('newUserResponse', users);
+        socket.disconnect();
+    });
+});
+
+// io.on("connection",(socket)=>{
+//   console.log('we are connected');
+// socket.on('chat', chat=>{
+//   io.emit('chat' , chat)
+// })
+
+//   socket.on('disconnect', ()=> {
+//     console.log('disconnected')
+//   })
+// })
+const logger = require("morgan");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
@@ -69,7 +129,7 @@ app.use("/admin", adminRouter);
 app.use("/dealer", dealerRouter);
 app.use("/map", mapRouter);
 
-app.listen(3001, () => {
+server.listen(3001, () => {
   console.log("server started on port 3001");
 });
 
