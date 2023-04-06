@@ -2,35 +2,42 @@ const mongoose = require("mongoose");
 
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
-const GroupSchema = new mongoose.Schema({
-    admin: {
-        type: String,
-        required: true
-    },
+const GroupSchema = new mongoose.Schema(
+  {
+    admin: [
+      {
+        type: Object,
+        required: true,
+      },
+    ],
 
     groupName: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
 
-    members: {
-        type: [String],
-    },
+    members: [
+      {
+        type: Object,
+      },
+    ],
     events: {
-        type: [ObjectId],
-        ref: "Posts"
+      type: [ObjectId],
+      ref: "Posts",
     },
     rides: {
-        type: [ObjectId],
-        ref: "Posts"
+      type: [ObjectId],
+      ref: "Posts",
     },
     image: {
-        type: String
+      type: String,
     },
     messageUpdate: {
-        type: Date
-    }
-}, { timestamps: true })
+      type: Date,
+    },
+  },
+  { timestamps: true }
+);
 
 const Group = mongoose.model("Group", GroupSchema);
 

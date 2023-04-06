@@ -134,4 +134,92 @@ module.exports = {
       res.json({ status: "failed", message: error.message });
     }
   },
+
+  // For admin
+
+  deleteDealer: async (req, res) => {
+    try {
+      const id = req.body.id;
+      await Dealer.deleteOne({ _id: id }).then(async () => {
+        const Details = await Dealer.find({});
+        Details.reverse();
+        res.json({ status: "success", result: Details });
+      });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  editDealer: async (req, res) => {
+    try {
+      const { dealerName, phone, city, state, email } = req.body;
+      const id = req.body.editId;
+      await Dealer.findByIdAndUpdate(id, {
+        dealerName,
+        phone,
+        city,
+        state,
+        email,
+      }).then(async () => {
+        const Details = await Dealer.find({});
+        Details.reverse();
+        res.json({ status: "success", result: Details });
+      });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  addDealer: async (req, res) => {
+    try {
+      const { dealerName, phone, password, city, state, email } = req.body;
+      const exist = await Dealer.findOne({ dealerName: dealerName });
+      if (exist) {
+        res.json({
+          status: "failed",
+          message: " already added this dealerName ",
+        });
+      } else {
+        const salt = await bcrypt.genSalt(10);
+        const hashPassword = await bcrypt.hash(password.trim(), salt);
+        await Dealer.create({
+          dealerName,
+          phone,
+          password: hashPassword,
+          city,
+          state,
+          email,
+        }).then(async (result) => {
+          const Details = await Dealer.find({});
+          Details.reverse();
+          res.json({ status: "success", result: Details });
+        });
+      }
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  getDealer: async (req, res) => {
+    try {
+      const Details = await Dealer.find({});
+      Details.reverse();
+      res.json({ status: "success", result: Details });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  block_dealer: async (req, res) => {
+    try {
+      const id = req.body.id;
+      const dealer = await Dealer.findOne({ _id: id });
+      if (dealer.isBanned === false) {
+        await Dealer.findByIdAndUpdate(id, { isBanned: true });
+      } else {
+        await Dealer.findByIdAndUpdate(id, { isBanned: false });
+      }
+      const Details = await Dealer.find({});
+      Details.reverse();
+      res.json({ status: "success", result: Details });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
 };

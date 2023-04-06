@@ -1,23 +1,31 @@
+const { upperCase } = require("lodash");
 const mongoose = require("mongoose");
 
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
-const MessageSchema = new mongoose.Schema({
+const MessageSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: true
+      type: Object,
+      required: true,
+      trim: true,
     },
 
     text: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
 
     group: {
-        type: ObjectId,
-        ref: "Group"
-    }
-}, { timestamps: true })
+      type: ObjectId,
+      ref: "Group",
+    },
+    image: {
+      type: String,
+    },
+  },
+  { timestamps: true }
+);
 
 const Messages = mongoose.model("Message", MessageSchema);
 

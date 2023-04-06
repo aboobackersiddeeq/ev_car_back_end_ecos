@@ -1,15 +1,19 @@
 const express = require("express");
 const userController = require("../controllers/user-controllers");
+const bookingController = require("../controllers/booking-controller");
+const testDriveController = require("../controllers/test-drive-controllers");
 const userAuth = require("../middlewares/Authentication");
 const router = express.Router();
-
+//user Details
 router.post("/login", userController.userlogin);
 router.post("/login-with-google", userController.userloginWithGoogle);
 router.post("/signup", userController.usersignup);
 router.get("/is-user-auth", userAuth.UserJwt, userController.isUserAuth);
-router.post("/test-drive", userController.testDriveBooking);
-router.post("/booking", userController.Booking);
-router.post("/update-booking", userController.updateBooking);
-router.get("/get-dealer", userController.getDealer);
+//test Drive
+router.post("/test-drive", testDriveController.testDriveBooking);
+//booking
+router.post("/booking", bookingController.Booking);
+router.post("/update-booking", bookingController.updateBooking);
+router.get("/get-dealer", bookingController.getDealer);
 
 module.exports = router;

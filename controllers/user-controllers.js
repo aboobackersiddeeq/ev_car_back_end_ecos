@@ -25,7 +25,7 @@ module.exports = {
         }).then((data) => {
           const userId = data._id;
           const token = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: 3000,
+            expiresIn: 3000000,
           }); //1h = 60 * 60
           res.json({
             auth: true,
@@ -54,7 +54,7 @@ module.exports = {
               { userId },
               process.env.ACCESS_TOKEN_SECRET,
               {
-                expiresIn: 3000,
+                expiresIn: 3000000,
               }
             ); //1h = 60 * 60
             res.json({
@@ -96,7 +96,7 @@ module.exports = {
         if (user.isBanned === false) {
           const userId = user._id;
           const token = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: 3000,
+            expiresIn: 3000000,
           }); //1h = 60 * 60
           res.json({
             auth: true,
@@ -120,7 +120,7 @@ module.exports = {
         }).then((data) => {
           const userId = data._id;
           const token = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: 3000,
+            expiresIn: 300000,
           }); //1h = 60 * 60
           res.json({
             auth: true,
@@ -144,6 +144,7 @@ module.exports = {
       let userDetails = await User.findById(req.userId);
       if (userDetails) {
         res.json({
+          result: userDetails,
           username: userDetails.username,
           email: userDetails.email,
           auth: true,
@@ -158,134 +159,51 @@ module.exports = {
       res.json({ message: e.message });
     }
   },
-  userEdit: async (req, res) => {
+
+  // users details for admin
+  getUsers: async (req, res) => {
     try {
-      const { ...obj } = req.body;
-      const userId = req.userId;
-      await User.findOneAndUpdate(userId, obj);
-      const userDetails = await User.findOne({ _id: userId });
-      const result = {
-        username: userDetails.username,
-        email: userDetails.email,
-        auth: true,
-        image: userDetails.image,
-      };
-      res.json({ result: result, status: "success" });
+      const users = await User.find({});
+      users.reverse();
+      res.json({ status: "success", result: users });
     } catch (error) {
       res.json({ status: "failed", message: error.message });
     }
   },
-  // save testDriveBooking of user
-  testDriveBooking: async (req, res) => {
+  deleteUsers: async (req, res) => {
     try {
-      const { ...obj } = req.body.formData;
-      const { name, email, phone, city, state, model, dealership, checked } =
-        obj;
-      const exist = await testDrive.findOne({ email: email });
-      if (exist) {
-        res.json({
-          status: "failed",
-          message: "You already test drive booked ",
-        });
+      const id = req.body.id;
+      await User.findByIdAndDelete(id);
+      const users = await User.find({});
+
+      res.json({ status: "success", result: users });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  editUsers: async (req, res) => {
+    try {
+      const id = req.body.editId;
+      const name = req.body.username;
+      const email = req.body.email;
+      await User.findByIdAndUpdate(id, { username: name, email: email });
+      const users = await User.find({});
+
+      res.json({ status: "success", result: users });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  block_user: async (req, res) => {
+    try {
+      const id = req.body.id;
+      const user = await User.findOne({ _id: id });
+      if (user.isBanned === false) {
+        await User.findByIdAndUpdate(id, { isBanned: true });
       } else {
-        await testDrive
-          .create({
-            name,
-            email,
-            phone,
-            city,
-            state,
-            model,
-            dealership,
-            checked,
-          })
-          .then((result) => {
-            res.json({ status: "success", result: result });
-          });
+        await User.findByIdAndUpdate(id, { isBanned: false });
       }
-    } catch (error) {
-      res.json({ status: "failed", message: error.message });
-    }
-  },
-  Booking: async (req, res) => {
-    try {
-      const { ...obj } = req.body.formData;
-      const {
-        names,
-        lastName,
-        address1,
-        address2,
-        pincode,
-        email,
-        phone,
-        city,
-        state,
-        model,
-        dealer,
-        bookingPrice,
-      } = obj;
-      const exist = await bookingSchema.findOne({ email: email });
-      if (exist) {
-        const status = await bookingSchema.findOne({
-          email: email,
-          status: "Pending",
-        });
-        if (status) {
-          res.json({
-            status: "Pending",
-            message:
-              "You already  booked  ,Your transaction cannot be completed",
-            orderId: status._id,
-          });
-        } else {
-          res.json({
-            status: "failed",
-            message: "You already  booked ",
-          });
-        }
-      } else {
-        await bookingSchema
-          .create({
-            names,
-            lastName,
-            address1,
-            address2,
-            pincode,
-            email,
-            phone,
-            city,
-            state,
-            model,
-            dealer,
-            bookingPrice,
-          })
-          .then((result) => {
-            res.json({
-              status: "success",
-              result: result,
-              orderId: result._id,
-            });
-          });
-      }
-    } catch (error) {
-      res.json({ status: "failed", message: error.message });
-    }
-  },
-  updateBooking: async (req, res) => {
-    try {
-      const id = req.body.params;
-      bookingSchema
-        .findByIdAndUpdate(id, { status: "Placed" })
-        .then((result) => {
-          res.json({ status: "success", result: result });
-        });
-    } catch (error) {
-      res.json({ status: "failed", message: error.message });
-    }
-  },
-  getDealer: async (req, res) => {
-    try {
-      const Details = await Dealer.find({});
+      const Details = await User.find({});
       Details.reverse();
       res.json({ status: "success", result: Details });
     } catch (error) {

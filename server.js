@@ -4,10 +4,11 @@ const express = require("express");
 const http =require('http')
 const Server =require("socket.io").Server
 const app = express();
-
+const Messages =require("./model/messege-schema") 
+const Group =require("./model/group-schema") 
 const server = http.createServer(app)
 const cors = require("cors");
-const io =new Server(server,{
+const socketIO =new Server(server,{
   cors:{
     origin:"*"
   }
@@ -19,13 +20,13 @@ socketIO.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);
 
     //sends the message to all the users on the server
-    socket.on('message', async (data) => {
-        // socketIO.emit('messageResponse', data);
+    socket.on('messages', async (data) => {
+        socket.emit('messages', data);
         //Adds the new user to the list of users
-        users.push(data.name);
+        // users.push(data.name);
        
         //Sends the list of users to the client
-        io.emit('newUserResponse', users);
+        // socketIO.emit('newUserResponse', users);
 
         const saveMsg = new Messages({
             name: data.name,
@@ -48,7 +49,7 @@ socketIO.on('connection', (socket) => {
         users = users.filter((user) => user.socketID !== socket.id);
         // console.log(users);
         //Sends the list of users to the client
-        io.emit('newUserResponse', users);
+        socketIO.emit('newUserResponse', users);
         socket.disconnect();
     });
 });
@@ -56,6 +57,7 @@ socketIO.on('connection', (socket) => {
 // io.on("connection",(socket)=>{
 //   console.log('we are connected');
 // socket.on('chat', chat=>{
+//   console.log(chat,'nancaht');
 //   io.emit('chat' , chat)
 // })
 
@@ -74,6 +76,7 @@ const userRouter = require("./routers/user-router");
 const adminRouter = require("./routers/admin-router");
 const dealerRouter = require("./routers/dealer-router");
 const mapRouter = require("./routers/map-router");
+const groupRouter = require("./routers/group-router")
 
 const fileStorage = multer.diskStorage({
   // Destination to store image
@@ -128,6 +131,7 @@ app.use("/", userRouter);
 app.use("/admin", adminRouter);
 app.use("/dealer", dealerRouter);
 app.use("/map", mapRouter);
+app.use("/group", groupRouter);
 
 server.listen(3001, () => {
   console.log("server started on port 3001");
