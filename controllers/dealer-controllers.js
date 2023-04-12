@@ -1,8 +1,39 @@
 const Dealer = require("../model/dealer-schema");
 const bcrypt = require("bcrypt");
+const nodemailer =require("nodemailer")
 const jwt = require("jsonwebtoken");
 const bookingSchema = require("../model/booking-schema");
 const testDrive = require("../model/test-drive-schema");
+const { isMatch } = require("lodash");
+const nodeUser = process.env.nodeMailer_User;
+const nodePass = process.env.SMTP_key_value;
+const port = process.env.SMTP_PORT;
+const host = process.env.host;
+let otp = null;
+const mailer = nodemailer.createTransport({
+  host: host,
+  port: port,
+  auth: {
+    user: nodeUser,
+    pass: nodePass,
+  },
+});
+let sendEmailOTP = (email, otpEmail) => {
+  console.log(otpEmail, email);
+
+  const mailOptions = {
+    to: email,
+    from: nodeUser,
+    subject: "Otp for registration is: ",
+    html:
+      "<h3>OTP for email verification is </h3>" +
+      "<h1 style='font-weight:bold;'>" +
+      otpEmail +
+      "</h1>", // html body
+  };
+  return mailer.sendMail(mailOptions); 
+};
+
 module.exports = {
   dealerLogin: async (req, res) => {
     try {
@@ -10,20 +41,17 @@ module.exports = {
       const dealer = await Dealer.findOne({ email: email });
       if (dealer) {
         if (dealer.isBanned === false) {
-          isMatch = await bcrypt.compare(password, dealer.password);
+          const isMatch = await bcrypt.compare(password, dealer.password);
           if (isMatch) {
             const token = jwt.sign(
               { dealerId: dealer._id },
               process.env.ACCESS_TOKEN_SECRET,
               { expiresIn: "5d" }
             );
-            const dealerDetails = {
-              email: dealer.email,
-            };
             res.json({
               auth: true,
               token: token,
-              result: dealerDetails,
+              result: dealer,
               status: "success",
               message: "signin success",
             });
@@ -31,7 +59,7 @@ module.exports = {
             res.json({
               auth: false,
               status: "failed",
-              message: "Admin password is incorrect",
+              message: "password is incorrect",
             });
           }
         } else {
@@ -57,12 +85,9 @@ module.exports = {
       let dealer = await Dealer.findById(req.dealerId);
       if (dealer) {
         if (dealer.isBanned === false) {
-          const dealerDetails = {
-            email: dealer.email,
-          };
           res.json({
             auth: true,
-            result: dealerDetails,
+            result: dealer,
             status: "success",
             message: "signin success",
           });
@@ -220,6 +245,117 @@ module.exports = {
       res.json({ status: "success", result: Details });
     } catch (error) {
       res.json({ status: "failed", message: error.message });
+    }
+  },
+  addPostImage: async (req, res) => {
+    try {
+      const id = req.body.id;
+      const image = req.files.img;
+      let imageUrl;
+      if (image) {
+        imageUrl = image[0].path;
+        imageUrl = imageUrl.substring(6);
+      }
+      await Dealer.findByIdAndUpdate(id, {
+        image: imageUrl,
+        dealerName: req.body.dealerName,
+      })
+        .then(async () => {
+          const Details = await Dealer.findOne({ _id: id });
+          res.json({ status: "success", result: Details });
+        })
+        .catch((error) => {
+          res.json({ status: "failed", message: error.message });
+        });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  sendOtp: async (req, res) => {
+    try {
+      const email = req.body.email;
+      if (email) {
+        const otpEmail = Math.floor(1000 + Math.random() * 9000);
+        otp = otpEmail;
+        sendEmailOTP(email, otpEmail)
+          .then((info) => {
+            console.log(`Message sent: ${info.messageId}`);
+            console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+            res. json({
+              message: `Otp is send to ${email}`,
+              status :'success'
+            });
+          })
+          .catch((error) => {
+            console.log(error,
+              'error message');
+          });
+      
+      } else {
+        return res
+          .status(200)
+          .send({ message: "user already exists", status :'failed' });
+      }
+   
+    } catch (error) {
+      console.log(error);
+      res.json({ message: "error creating user", status :'failed'});
+    }
+  },
+  verifyOtp: async (req, res) => {
+    try {
+      if(otp == req.body.otp){
+        res.status(200).send({
+          message: "Verified!",
+          status :'success'
+        });
+      }else{
+        res.json({ message: "Verification failed", status :'failed'});
+      }
+   
+    } catch (error) { 
+      res.status(500).send({message: "Verification failed", status :'failed'});
+    }
+  },
+  delearPasswordUpdate: async (req, res) => {
+    try {
+      const id = req.body.id;
+      const password =req.body.password
+      const salt = await bcrypt.genSalt(10);
+        const hashPassword = await bcrypt.hash(password.trim(), salt);
+      await Dealer.findByIdAndUpdate(id, {
+        password :hashPassword
+        
+      })
+        .then(async () => {
+          const Details = await Dealer.findOne({ _id: id });
+          res.json({status :'success', message: "Password changed successfully", result: Details });
+        })
+        .catch((error) => {
+          res.json({ status: "failed", message: error.message });
+        });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  verifyOldPassword: async (req, res) => {
+    try {
+ 
+      const { email, password } = req.body;
+      const dealer = await Dealer.findOne({ email: email });
+      const isMatch = await bcrypt.compare(password, dealer.password);
+      if( isMatch){
+        res.status(200).send({
+          message: "Success ,Change your password",
+          status :'success'
+        });
+      }else{
+        res.json({ message: "Password incorrect", status :'failed'});
+      }
+   
+    } catch (error) { 
+      console.log(error,'error');
+      res.status(500).send({message: "Verification failed", status :'failed'});
     }
   },
 };
