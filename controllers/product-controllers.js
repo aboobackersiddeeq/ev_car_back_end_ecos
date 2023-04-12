@@ -5,7 +5,7 @@ module.exports = {
   addPostProducts: async (req, res) => {
     try {
       const image = req.files.img;
-      let product = "";
+      let product;
       if (product) {
         res.json("This Product is already entered");
       } else if (!image) {
@@ -14,6 +14,7 @@ module.exports = {
       } else {
         let imageUrl = image[0].path;
         imageUrl = imageUrl.substring(6);
+        console.log(imageUrl);
         //   multiple image
         const { images } = req.files;
         const arrimg = [];
