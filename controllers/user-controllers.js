@@ -1,7 +1,4 @@
 const User = require("../model/user-schema");
-const testDrive = require("../model/test-drive-schema");
-const bookingSchema = require("../model/booking-schema");
-const Dealer = require("../model/dealer-schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 module.exports = {
