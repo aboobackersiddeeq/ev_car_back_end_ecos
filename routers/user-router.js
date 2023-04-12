@@ -1,6 +1,6 @@
 const express = require("express");
 const userController = require("../controllers/user-controllers");
-const bookingController = require("../controllers/booking-controller");
+const bookingController = require("../controllers/booking-controllers");
 const testDriveController = require("../controllers/test-drive-controllers");
 const userAuth = require("../middlewares/Authentication");
 const router = express.Router();
