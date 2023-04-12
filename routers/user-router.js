@@ -2,7 +2,7 @@ const express = require("express");
 const userController = require("../controllers/user-controllers");
 const bookingController = require("../controllers/booking-controllers");
 const testDriveController = require("../controllers/test-drive-controllers");
-const userAuth = require("../middlewares/Authentication");
+const userAuth = require("../middlewares/authentication");
 const router = express.Router();
 //user Details
 router.post("/login", userController.userlogin);
