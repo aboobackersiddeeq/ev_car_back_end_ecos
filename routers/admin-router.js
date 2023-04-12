@@ -3,7 +3,7 @@ const adminController = require("../controllers/admin-controllers");
 const productController = require("../controllers/product-controllers");
 const dealerController = require("../controllers/dealer-controllers");
 const userController = require("../controllers/user-controllers");
-const bookingController = require("../controllers/booking-controller");
+const bookingController = require("../controllers/booking-controllers");
 const testDriveController = require("../controllers/test-drive-controllers");
 const adminAuth = require("../middlewares/Authentication");
 const router = express.Router();
@@ -25,7 +25,11 @@ router.get("/test-drive", testDriveController.getTestDrive);
 // deler details
 router.post("/add-dealer", adminAuth.adminJwt, dealerController.addDealer);
 router.get("/get-dealers", adminAuth.adminJwt, dealerController.getDealer);
-router.post("/delete-dealer", adminAuth.adminJwt, dealerController.deleteDealer);
+router.post(
+  "/delete-dealer",
+  adminAuth.adminJwt,
+  dealerController.deleteDealer
+);
 router.post("/edit-dealer", adminAuth.adminJwt, dealerController.editDealer);
 router.post("/block-dealer", adminAuth.adminJwt, dealerController.block_dealer);
 // booking details
