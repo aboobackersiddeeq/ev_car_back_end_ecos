@@ -25,7 +25,6 @@ module.exports.dealerJwt = async (req, res, next) => {
   } else {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
       if (err) {
-        console.log(err, "error");
         res.json({
           auth: false,
           status: "failed",
