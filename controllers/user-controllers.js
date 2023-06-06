@@ -207,4 +207,23 @@ module.exports = {
       res.json({ status: "failed", message: error.message });
     }
   },
+  userPasswordUpdate: async (req, res) => {
+    try {
+      const email = req.body.email;
+      const password =req.body.password
+      const salt = await bcrypt.genSalt(10);
+        const hashPassword = await bcrypt.hash(password.trim(), salt);
+      await User.updateOne({email:email},{
+        password :hashPassword })
+        .then(async () => {
+          const Details = await User.findOne({email:email});
+          res.json({status :'success', message: "Password changed successfully", result: Details });
+        })
+        .catch((error) => {
+          res.json({ status: "failed", message: error.message });
+        });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
 };
