@@ -61,6 +61,12 @@ module.exports = {
               status: "success",
               message: "signin success",
             });
+          }else {
+            res.json({
+              auth: false,
+              status: "failed",
+              message: "Password is incorrect. Try again.",
+            });
           }
         } else {
           res.json({
