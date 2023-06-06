@@ -82,4 +82,46 @@ module.exports = {
         .send({ message: "Verification failed", status: "failed" });
     }
   },
+
+  
+  forgotOtp: async (req, res) => {
+    try {
+      const email = req.body.email;
+      const userExist = await User.findOne({email:email})
+      if ( email&& userExist) {
+        const otpEmail = Math.floor(1000 + Math.random() * 9000);
+        otp = otpEmail;
+        sendEmailOTP(email, otpEmail)
+          .then((info) => {
+            // console.log(`Message sent: ${info.messageId}`);
+            // console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+            res.json({
+              message: `Otp is send to ${email}`,
+              status: "success",
+            });
+          })
+          .catch((error) => {
+            console.log(error)
+            res.json({
+              error:error,
+              message: `Email Authentication unsuccessful`,
+              status: "failed",
+            });
+          });
+      } else {
+        res.json({
+            message: `User not found`,
+            status: "failed",
+          });
+      }
+    } catch (error) {
+        res.json({
+            message: `Something went wrong`,
+            status: "failed",
+          });
+    }
+  }
+  
+  
+  
 };
