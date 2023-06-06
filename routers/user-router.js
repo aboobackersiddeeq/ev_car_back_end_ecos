@@ -10,8 +10,10 @@ router.post("/login", userController.userlogin);
 router.post("/login-with-google", userController.userloginWithGoogle);
 router.post("/signup", userController.usersignup);
 router.get("/is-user-auth", userAuth.UserJwt, userController.isUserAuth);
+router.post("/new-password", userController.userPasswordUpdate);
 // OTP 
 router.post("/otp", otpController.sendOtp);
+router.post("/forgot-password", otpController.forgotOtp);
 router.post("/verify",otpController.verifyOtp);
 //test Drive
 router.post("/test-drive", testDriveController.testDriveBooking);
