@@ -1,5 +1,7 @@
 const User = require("../model/user-schema");
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const nodeUser = process.env.nodeMailer_User;
 const nodePass = process.env.SMTP_key_value;
 const port = process.env.SMTP_PORT;
@@ -63,7 +65,6 @@ let sendEmailOTPForForgot = (email, otpEmail, username) => {
 };
 module.exports = {
   sendOtp: async (req, res) => {
-    console.log(req.body);
     try {
       const email = req.body.email;
       const name = req.body.username;
@@ -117,6 +118,40 @@ module.exports = {
         .send({ message: "Verification failed", status: "failed" });
     }
   },
+  verifyOtpAndForgotPassword: async (req, res) => {
+    try {
+      if (otp == req.body.otp) {
+        const email = req.body.email;
+        const password = req.body.password;
+        const salt = await bcrypt.genSalt(10);
+        const hashPassword = await bcrypt.hash(password.trim(), salt);
+        await User.updateOne(
+          { email: email },
+          {
+            password: hashPassword,
+          }
+        )
+          .then(async () => {
+            const Details = await User.findOne({ email: email });
+            res.json({
+              status: "success",
+              message: "Password changed successfully",
+              result: Details,
+              verificationStatus: "success",
+            });
+          })
+          .catch((error) => {
+            res.json({ status: "failed", message: error.message });
+          });
+      } else {
+        res.json({ message: "Verification failed", status: "failed" });
+      }
+    } catch (error) {
+      res
+        .status(500)
+        .send({ message: "Verification failed", status: "failed" });
+    }
+  },
 
   forgotOtp: async (req, res) => {
     try {
@@ -155,7 +190,7 @@ module.exports = {
       });
     }
   },
-  verifyOtpAndVerify: async (req, res) => {
+  verifyOtpAndSignup: async (req, res) => {
     try {
       if (otp == req.body.otp) {
         const { username, email, password, phone } = req.body;
