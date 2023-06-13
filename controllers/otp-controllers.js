@@ -155,4 +155,56 @@ module.exports = {
       });
     }
   },
+  verifyOtpAndVerify: async (req, res) => {
+    try {
+      if (otp == req.body.otp) {
+        const { username, email, password, phone } = req.body;
+        const user = await User.findOne({ email: email });
+        if (user) {
+          res.json({
+            status: "failed",
+            message: "Email already exist login now",
+          });
+        } else {
+          const salt = await bcrypt.genSalt(10);
+          const hashPassword = await bcrypt.hash(password.trim(), salt);
+          await User.create({
+            username,
+            email,
+            password: hashPassword,
+            phone,
+          })
+            .then((data) => {
+              const userId = data._id;
+              const token = jwt.sign(
+                { userId },
+                process.env.ACCESS_TOKEN_SECRET,
+                {
+                  expiresIn: 3000000,
+                }
+              ); //1h = 60 * 60
+              res.json({
+                auth: true,
+                token: token,
+                result: data,
+                status: "success",
+                message: "signin success",
+                verificationStatus: "success",
+              });
+            })
+            .catch((error) => {
+              res
+                .status(500)
+                .send({ message: "Verification failed", status: "failed" });
+            });
+        }
+      } else {
+        res.json({ message: "Verification failed", status: "failed" });
+      }
+    } catch (error) {
+      res
+        .status(500)
+        .send({ message: "Verification failed", status: "failed" });
+    }
+  },
 };

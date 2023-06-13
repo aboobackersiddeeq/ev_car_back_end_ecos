@@ -15,6 +15,7 @@ router.post("/new-password", userController.userPasswordUpdate);
 router.post("/otp", otpController.sendOtp);
 router.post("/forgot-password", otpController.forgotOtp);
 router.post("/verify",otpController.verifyOtp);
+router.post("/verify-and-signup",otpController.verifyOtpAndVerify);
 //test Drive
 router.post("/test-drive", testDriveController.testDriveBooking);
 //booking
