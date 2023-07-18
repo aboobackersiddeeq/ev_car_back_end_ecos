@@ -78,6 +78,23 @@ module.exports = {
       res.json({ status: "failed", message: error.message });
     }
   },
+  updateBookingStatus: async (req, res) => {
+    try {
+      const {id,status } =req.body
+      if(id && status){
+
+        bookingSchema
+          .findByIdAndUpdate(id, { status:  status })
+          .then((result) => {
+            res.json({ status: "success", result: result });
+          });
+      }else{
+        res.json({ status: "failed", message: 'Id and status is not found' });  
+      }
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
   getDealer: async (req, res) => {
     try {
       const Details = await Dealer.find({});
@@ -93,6 +110,22 @@ module.exports = {
       const Details = await bookingSchema.find({});
       Details.reverse();
       res.json({ status: "success", result: Details });
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  //  for geting user booking details
+  getBookingUser: async (req, res) => {
+    const {email}= req.body
+    try {
+      if(email){
+
+        const Details = await bookingSchema.find({email:email});
+        Details.reverse();
+        res.json({ status: "success", result: Details });
+      }else{
+        res.json({ status: "failed", message: 'Email is not found'});
+      }
     } catch (error) {
       res.json({ status: "failed", message: error.message });
     }

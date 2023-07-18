@@ -45,4 +45,32 @@ module.exports = {
       res.json({ status: "failed", message: error.message });
     }
   },
+  getTestDriveUser: async (req, res) => {
+    const { email } = req.body;
+    try {
+      if (email) {
+        const Details = await testDrive.find({ email: email });
+        Details.reverse();
+        res.json({ status: "success", result: Details });
+      } else {
+        res.json({ status: "failed", message: "Email not found" });
+      }
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
+  updateTestDriveStatus: async (req, res) => {
+    try {
+      const { id, status } = req.body;
+      if (id && status) {
+        testDrive.findByIdAndUpdate(id, { status: status }).then((result) => {
+          res.json({ status: "success", result: result });
+        });
+      }else{
+        res.json({ status: "failed", message: 'Id and status is not found' });
+      }
+    } catch (error) {
+      res.json({ status: "failed", message: error.message });
+    }
+  },
 };

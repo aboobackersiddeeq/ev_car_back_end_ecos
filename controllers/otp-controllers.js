@@ -198,7 +198,7 @@ module.exports = {
         if (user) {
           res.json({
             status: "failed",
-            message: "Email already exist login now",
+            message: "Email already exist,login now",
           });
         } else {
           const salt = await bcrypt.genSalt(10);

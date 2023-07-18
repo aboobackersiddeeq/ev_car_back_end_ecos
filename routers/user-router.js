@@ -19,9 +19,11 @@ router.post("/verify-and-signup",otpController.verifyOtpAndSignup);
 router.post("/verify-and-forgot",otpController.verifyOtpAndForgotPassword);
 //test Drive
 router.post("/test-drive", testDriveController.testDriveBooking);
+router.post("/get-test-drive-user", testDriveController.getTestDriveUser);
 //booking
 router.post("/booking", bookingController.Booking);
 router.post("/update-booking", bookingController.updateBooking);
 router.get("/get-dealer", bookingController.getDealer);
+router.get("/get-booking-user", bookingController.getBookingUser);
 
 module.exports = router;

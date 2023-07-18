@@ -22,6 +22,11 @@ router.post("/add-post", productController.addPostProducts);
 router.post("/edit-product", adminAuth.adminJwt, productController.editProduct);
 // test drive details
 router.get("/test-drive", testDriveController.getTestDrive);
+router.post(
+  "/update-test-drive-status",
+  adminAuth.adminJwt,
+  testDriveController.updateTestDriveStatus
+);
 // deler details
 router.post("/add-dealer", adminAuth.adminJwt, dealerController.addDealer);
 router.get("/get-dealers", adminAuth.adminJwt, dealerController.getDealer);
@@ -34,6 +39,11 @@ router.post("/edit-dealer", adminAuth.adminJwt, dealerController.editDealer);
 router.post("/block-dealer", adminAuth.adminJwt, dealerController.block_dealer);
 // booking details
 router.get("/get-bookings", adminAuth.adminJwt, bookingController.getBooking);
+router.post(
+  "/get-bookings-status",
+  adminAuth.adminJwt,
+  bookingController.updateBookingStatus
+);
 // user details
 router.get("/get-users", adminAuth.adminJwt, userController.getUsers);
 router.post("/block-user", adminAuth.adminJwt, userController.block_user);
