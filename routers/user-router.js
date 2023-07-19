@@ -24,6 +24,6 @@ router.post("/get-test-drive-user", testDriveController.getTestDriveUser);
 router.post("/booking", bookingController.Booking);
 router.post("/update-booking", bookingController.updateBooking);
 router.get("/get-dealer", bookingController.getDealer);
-router.get("/get-booking-user", bookingController.getBookingUser);
+router.post("/get-booking-user", bookingController.getBookingUser);
 
 module.exports = router;
