@@ -35,13 +35,6 @@ const testDrive = new mongoose.Schema(
       type: Boolean,
       trim: true,
     },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
     status: {
       type: String,
       lowercase: true,
