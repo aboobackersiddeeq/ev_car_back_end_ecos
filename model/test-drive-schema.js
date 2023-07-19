@@ -42,7 +42,11 @@ const testDrive = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-
+    status: {
+      type: String,
+      lowercase: true,
+      trim: true,
+    },
     isBanned: { type: Boolean, default: false },
   },
   {
