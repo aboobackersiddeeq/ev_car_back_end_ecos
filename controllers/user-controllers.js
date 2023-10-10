@@ -29,7 +29,7 @@ module.exports = {
             token: token,
             result: data,
             status: "success",
-            message: "signin success",
+            message: "Signin success",
           });
         });
       }
@@ -106,7 +106,7 @@ module.exports = {
             token: token,
             result: user,
             status: "success",
-            message: "signin success",
+            message: "Signin success",
           });
         } else {
           res.json({
@@ -130,7 +130,7 @@ module.exports = {
             token: token,
             result: data,
             status: "success",
-            message: "signin success",
+            message: "Signin success",
           });
         });
       }
@@ -155,7 +155,7 @@ module.exports = {
         });
       } else {
         res.json({
-          message: "user not found",
+          message: "User not found",
         });
       }
     } catch (e) {
