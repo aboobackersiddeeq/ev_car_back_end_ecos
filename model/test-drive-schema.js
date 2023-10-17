@@ -39,6 +39,7 @@ const testDrive = new mongoose.Schema(
       type: String,
       lowercase: true,
       trim: true,
+      default: "Pending",
     },
     isBanned: { type: Boolean, default: false },
   },
