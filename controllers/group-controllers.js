@@ -1,6 +1,6 @@
 const Group = require("../model/group-schema");
 const Messages = require("../model/messege-schema");
-const cloudinaryImageDelete = require("../utils/delete-cloudnary");
+const cloudinaryImageDelete = require("../utils/delete-cloudinary");
 
 module.exports = {
   newGroup: async (req, res) => {

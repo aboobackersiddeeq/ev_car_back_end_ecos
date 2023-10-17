@@ -1,4 +1,4 @@
-const { cloudinary } = require("../utils/cloudnery");
+const { cloudinary } = require("./cloudinary");
 
 const extractPathWithoutExtensionFromCloudinaryURL = (cloudinaryURL) => {
   const pathRegex = /upload\/(v\d+\/)?(.+)\.\w+$/i;

@@ -1,7 +1,7 @@
 const express = require("express");
 const controller = require("../controllers/dealer-controllers");
 const authentication = require("../middlewares/authentication");
-const {uploadImage} = require('../utils/cloudnery')
+const {uploadImage} = require('../utils/cloudinary')
 const router = express.Router();
 
 router.post("/", controller.dealerLogin);

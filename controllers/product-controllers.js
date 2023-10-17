@@ -1,5 +1,5 @@
 const Product = require("../model/product-schema");
-const cloudinaryImageDelete = require("../utils/delete-cloudnary");
+const cloudinaryImageDelete = require("../utils/delete-cloudinary");
 
 module.exports = {
   // For admin

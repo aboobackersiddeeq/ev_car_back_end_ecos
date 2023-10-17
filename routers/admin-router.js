@@ -6,7 +6,7 @@ const userController = require("../controllers/user-controllers");
 const bookingController = require("../controllers/booking-controllers");
 const testDriveController = require("../controllers/test-drive-controllers");
 const adminAuth = require("../middlewares/authentication");
-const {uploadImage} = require('../utils/cloudnery')
+const {uploadImage} = require('../utils/cloudinary')
 const router = express.Router();
 
 router.post("/", adminController.adminLogin);
