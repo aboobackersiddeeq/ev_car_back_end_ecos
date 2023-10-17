@@ -1,5 +1,6 @@
 const Group = require("../model/group-schema");
 const Messages = require("../model/messege-schema");
+const cloudinaryImageDelete = require("../utils/delete-cloudnary");
 
 module.exports = {
   newGroup: async (req, res) => {
@@ -91,13 +92,17 @@ module.exports = {
   },
   editGrpDp: async (req, res) => {
     try {
+      const group = await Group.findById(req.body.id)
+      if(req.file?.path && group.image){
+        cloudinaryImageDelete(group.image);
+      }
       Group.findOneAndUpdate(
         {
           _id: req.body.id,
         },
         {
           $set: {
-            image: req.file.path,
+            image: req.file?.path,
           },
         }
       )
@@ -110,6 +115,7 @@ module.exports = {
 
   editGrpName: async (req, res) => {
     try {
+      
       Group.findOneAndUpdate(
         {
           _id: req.body.id,
@@ -129,14 +135,18 @@ module.exports = {
   addPostImage: async (req, res) => {
     try {
       const id = req.body.id;
-      const image = req.files.img;
-      let imageUrl;
-      if (image) {
-        imageUrl = image[0].path;
-        imageUrl = imageUrl.substring(6);
+      // const image = req.files.img;
+      // let imageUrl;
+      // if (image) {
+      //   imageUrl = image[0].path;
+      //   imageUrl = imageUrl.substring(6);
+      // }
+      const group = await Group.findById(id)
+      if(req.file?.path && group.image){
+        cloudinaryImageDelete(group.image);
       }
       await Group.findByIdAndUpdate(id, {
-        image: imageUrl,
+        image: req.file?.path,
         groupName: req.body.groupName,
       })
         .then(async () => {

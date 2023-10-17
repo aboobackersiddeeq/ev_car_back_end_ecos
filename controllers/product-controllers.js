@@ -1,4 +1,5 @@
 const Product = require("../model/product-schema");
+const cloudinaryImageDelete = require("../utils/delete-cloudnary");
 
 module.exports = {
   // For admin
@@ -32,6 +33,10 @@ module.exports = {
   deleteProduct: async (req, res) => {
     try {
       const id = req.body.id;
+      const product = await Product.findById(id);
+      if (product?.image) {
+        await cloudinaryImageDelete(product.image);
+      }
       await Product.deleteOne({ _id: id }).then(async () => {
         const productDetails = await Product.find({});
         productDetails.reverse();
@@ -44,13 +49,17 @@ module.exports = {
   editProduct: async (req, res) => {
     try {
       const id = req.body.editId;
+      const product = await Product.findById(id)
+      if(req.file?.path && product.image){
+        cloudinaryImageDelete(product.image);
+      }
       await Product.findByIdAndUpdate(id, {
         productName: req.body.productName,
         price: req.body.price,
         bookingPrice: req.body.bookingPrice,
         color: req.body.color,
         description: req.body.description,
-        image: req.body.img,
+        image: req.file?.path,
       }).then(async (data) => {
         const product = await Product.find({});
         product.reverse();
@@ -68,7 +77,7 @@ module.exports = {
         bookingPrice: req.body.bookingPrice,
         color: req.body.color,
         description: req.body.description,
-        image: req.body.img,
+        image: req.file.path,
       });
       await product.save().then(async (r) => {
         const productDetails = await Product.find({});

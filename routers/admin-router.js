@@ -6,12 +6,13 @@ const userController = require("../controllers/user-controllers");
 const bookingController = require("../controllers/booking-controllers");
 const testDriveController = require("../controllers/test-drive-controllers");
 const adminAuth = require("../middlewares/authentication");
+const {uploadImage} = require('../utils/cloudnery')
 const router = express.Router();
 
 router.post("/", adminController.adminLogin);
 router.get("/isAdminAuth", adminAuth.adminJwt, adminController.adminAuth);
 // prduct details
-router.post("/add-product", adminAuth.adminJwt, productController.addProduct);
+router.post("/add-product", adminAuth.adminJwt,uploadImage,productController.addProduct);
 router.post("/get-product", productController.getProduct);
 router.post(
   "/delete-product",
@@ -19,7 +20,7 @@ router.post(
   productController.deleteProduct
 );
 router.post("/add-post", productController.addPostProducts);
-router.post("/edit-product", adminAuth.adminJwt, productController.editProduct);
+router.post("/edit-product", adminAuth.adminJwt,uploadImage, productController.editProduct);
 // test drive details
 router.get("/test-drive", testDriveController.getTestDrive);
 router.post(

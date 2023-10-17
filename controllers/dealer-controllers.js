@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const bookingSchema = require("../model/booking-schema");
 const testDrive = require("../model/test-drive-schema");
 const { isMatch } = require("lodash");
+const cloudinaryImageDelete = require("../utils/delete-cloudnary");
 const nodeUser = process.env.nodeMailer_User;
 const nodePass = process.env.SMTP_key_value;
 const port = process.env.SMTP_PORT;
@@ -250,14 +251,18 @@ module.exports = {
   addPostImage: async (req, res) => {
     try {
       const id = req.body.id;
-      const image = req.files.img;
-      let imageUrl;
-      if (image) {
-        imageUrl = image[0].path;
-        imageUrl = imageUrl.substring(6);
+      // const image = req.files.img;
+      // let imageUrl;
+      // if (image) {
+      //   imageUrl = image[0].path;
+      //   imageUrl = imageUrl.substring(6);
+      // }
+      const dealer = await Dealer.findById(id)
+      if(req.file?.path && dealer.image){
+        cloudinaryImageDelete(product.image);
       }
       await Dealer.findByIdAndUpdate(id, {
-        image: imageUrl,
+        image: req.file?.path,
         dealerName: req.body.dealerName,
       })
         .then(async () => {

@@ -1,12 +1,13 @@
 const express = require("express");
 const controller = require("../controllers/dealer-controllers");
 const authentication = require("../middlewares/authentication");
+const {uploadImage} = require('../utils/cloudnery')
 const router = express.Router();
 
 router.post("/", controller.dealerLogin);
 router.get("/isDealerAuth", authentication.dealerJwt, controller.dealerAuth);
 router.get("/get-bookings", authentication.dealerJwt, controller.getBooking);
-router.post("/update-dealer", authentication.dealerJwt, controller.addPostImage);
+router.post("/update-dealer", authentication.dealerJwt,uploadImage,controller.addPostImage);
 router.post("/otp",authentication.dealerJwt, controller.sendOtp);
 router.post("/verify-otp",authentication.dealerJwt,controller.verifyOtp);
 router.post("/old-password",authentication.dealerJwt,controller.verifyOldPassword);
